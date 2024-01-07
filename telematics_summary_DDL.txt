@@ -1,0 +1,115 @@
+use personal_secured;
+
+DROP TABLE IF EXISTS telematics;
+CREATE EXTERNAL TABLE telematics(
+  vendor string, 
+  brand_cd string, 
+  program_nme string, 
+  product_cd string, 
+  type_id string, 
+  trip_id string, 
+  vchr_nbr decimal(10,0), 
+  point_time string, 
+  point_latitude decimal(9,6), 
+  point_longitude decimal(9,6), 
+  point_gps_qlty string, 
+  point_gps_prcsn decimal(32,16), 
+  point_lcl_time_offst int, 
+  event_cd string, 
+  event_intnsty string, 
+  event_durtn int, 
+  odmtr_readng int, 
+  avg_speed_during_event int, 
+  max_acclrtn_during_event decimal(5,2), 
+  yds_trvld decimal(6,3), 
+  time_elpsd decimal(6,3), 
+  rnd_time_elpsd int, 
+  point_speed decimal(6,3), 
+  point_speed_vss decimal(6,3), 
+  point_speed_gps decimal(6,3), 
+  point_hdng decimal(32,16), 
+  avg_speed_from_prev_point smallint, 
+  road_typ string, 
+  point_gmt_dtm timestamp, 
+  point_gmt_int int, 
+  point_local_dtm timestamp, 
+  point_speed_diff decimal(6,3), 
+  point_source string, 
+  vehcl_rpm int, 
+  vndr_sys_trip_flg string, 
+  usr_trip_flg string, 
+  device_id string, 
+  trip_event_id string, 
+  trip_event_typ_cd string, 
+  src_date_partition string)
+PARTITIONED BY ( 
+  point_dt string)
+CLUSTERED BY ( 
+  trip_id, 
+  point_time) 
+SORTED BY ( 
+  trip_id ASC, 
+  point_time ASC) 
+INTO 12 BUCKETS
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.ql.io.orc.OrcSerde' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat'
+LOCATION
+  '/personal/secured/telematics/octo'
+TBLPROPERTIES (
+  'orc.compress'='SNAPPY');
+  
+  
+
+use pi_telematics_summary;
+
+DROP TABLE IF EXISTS tlm_trip_sumry;
+CREATE EXTERNAL TABLE tlm_trip_sumry(
+  vendor string, 
+  brand_cd string, 
+  program_nme string, 
+  product_cd string, 
+  trip_id string, 
+  vchr_nbr string, 
+  low_brkng_ct int, 
+  med_brkng_ct int, 
+  hi_brkng_ct int, 
+  low_acc_ct int, 
+  med_acc_ct int, 
+  hi_acc_ct int, 
+  night_mileage_tot decimal(12,3), 
+  calc_mileage_tot decimal(12,3), 
+  yds_trvld_tot decimal(12,3), 
+  trip_st_time timestamp, 
+  trip_end_time timestamp, 
+  trip_durtn decimal(10,6), 
+  local_dt string, 
+  trip_cmpltd_ind string, 
+  vndr_sys_trip_flg string, 
+  usr_trip_flg string, 
+  src_date_partition string)
+PARTITIONED BY ( 
+  point_dt string)
+CLUSTERED BY ( 
+  trip_id, 
+  src_date_partition) 
+SORTED BY ( 
+  trip_id ASC, 
+  src_date_partition ASC) 
+INTO 12 BUCKETS
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.ql.io.orc.OrcSerde' 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat'
+LOCATION
+  '/personal/application/telematics_summary'
+TBLPROPERTIES (
+  'orc.compress'='SNAPPY');
+  
+
+
